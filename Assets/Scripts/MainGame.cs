@@ -9,6 +9,8 @@ public class MainGame : MonoBehaviour
     public int height = 16;
     public int mineNum = 50;
 
+    private const float LongPressDuration = 0.5f;
+
     private Board board;
     private Cell[,] state;
     private Cell[,] mines;
@@ -17,25 +19,35 @@ public class MainGame : MonoBehaviour
 
 
 
-    private void Awake(){
+    private void Awake()
+    {
         board = GetComponentInChildren<Board>();
     }
 
 
-    private void Start(){
+    private void Start()
+    {
         NewGame();
     }
 
 
     //generates new game (need to modify to start new game on user input later)
-    private void NewGame(){
+    private void NewGame()
+    {
         //new game has initial game state
         state = new Cell[width, height];
         MakeCells();
         MakeMines();
         NumberCells();
         MakeSquares();
-        board.drawGrid(state);
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                board.drawCell(state[i, j], i, j);
+            }
+        }
     }
 
 
@@ -142,7 +154,7 @@ public class MainGame : MonoBehaviour
             for (int y = 0; y < height; y++){
                 Cell cell = new Cell();
                 cell.number = 0;
-                cell.revealed = true;
+                cell.revealed = false;
                 cell.flagged = false;
                 state[x,y] = cell;
             }
@@ -190,20 +202,70 @@ public class MainGame : MonoBehaviour
           //  }
     //}
 
-    private void Update(){
-        if (Input.GetMouseButtonDown(0)){ // left click
-            //flag
-        }
 
-        if (Input.GetMouseButtonDown(1)){ //right click
-            //reveal
+    // Returns true if a right click or a long tap is detected
+    private Vector3? DetectFlagAction()
+    {
+        if (Input.GetMouseButtonDown(1)) return Input.mousePosition;
+        foreach (Touch touch in Input.touches)
+        {
+            if (touch.phase == TouchPhase.Ended
+                && touch.deltaTime >= LongPressDuration) return touch.position;
         }
+        return null;
     }
 
 
-    private void FloodFill(){
-
+    // Returns the position vector if a left click or a tap is detected
+    // Returns null otherwise
+    private Vector3? DetectRevealAction()
+    {
+        if (Input.GetMouseButtonDown(0)) return Input.mousePosition;
+        foreach (Touch touch in Input.touches)
+        {
+            if (touch.phase == TouchPhase.Ended
+                && touch.deltaTime < LongPressDuration) return touch.position;
+        }
+        return null;
     }
 
 
+    private void Update()
+    {
+        if (DetectFlagAction() is Vector3 flagPos)
+        {
+            (int i, int j) = board.ScreenToCoord(flagPos);
+            Debug.Log($"Flag ({i}, {j})");
+            if (i >= 0 && i < height && j >= 0 && j < width)
+            {
+                if (state[i, j].revealed)
+                {
+                    Debug.Log("Ignoring Flag on a revealed cell");
+                }
+                else
+                {
+                    state[i, j].flagged = true;
+                    board.drawCell(state[i, j], i, j);
+                }
+            }
+        }
+        if (DetectRevealAction() is Vector3 revealPos)
+        {
+            (int i, int j) = board.ScreenToCoord(revealPos);
+            Debug.Log($"Reveal ({i}, {j})");
+            if (i >= 0 && i < height && j >= 0 && j < width)
+            {
+                if (state[i, j].flagged)
+                {
+                    Debug.Log("Ignoring Reveal on a flagged cell");
+                }
+                else
+                {
+                    state[i, j].flagged = false;
+                    state[i, j].revealed = true;
+                    board.drawCell(state[i, j], i, j);
+                }
+            }
+        }
+    }
 }
