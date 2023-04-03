@@ -244,7 +244,7 @@ public class MainGame : MonoBehaviour
                 }
                 else
                 {
-                    state[i, j].flagged = true;
+                    state[i, j].flagged = !state[i, j].flagged;
                     board.drawCell(state[i, j], i, j);
                 }
             }
