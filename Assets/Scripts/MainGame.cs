@@ -235,9 +235,9 @@ public class MainGame : MonoBehaviour
         if (DetectFlagAction() is Vector3 flagPos)
         {
             (int i, int j) = board.ScreenToCoord(flagPos);
-            Debug.Log($"Flag ({i}, {j})");
             if (i >= 0 && i < height && j >= 0 && j < width)
             {
+                Debug.Log($"Flag ({i}, {j})");
                 if (state[i, j].revealed)
                 {
                     Debug.Log("Ignoring Flag on a revealed cell");
@@ -252,9 +252,9 @@ public class MainGame : MonoBehaviour
         if (DetectRevealAction() is Vector3 revealPos)
         {
             (int i, int j) = board.ScreenToCoord(revealPos);
-            Debug.Log($"Reveal ({i}, {j})");
             if (i >= 0 && i < height && j >= 0 && j < width)
             {
+                Debug.Log($"Reveal ({i}, {j})");
                 if (state[i, j].flagged)
                 {
                     Debug.Log("Ignoring Reveal on a flagged cell");
