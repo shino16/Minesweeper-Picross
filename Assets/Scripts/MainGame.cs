@@ -58,7 +58,7 @@ public class MainGame : MonoBehaviour
                     isMine = false;
                 }
             }
-            
+
             //sets cell to -1, allows board to draw the correct cell type (nuke-y)
             state[x,y].number = -1;
         }
@@ -72,19 +72,21 @@ public class MainGame : MonoBehaviour
         int rows = Random.Range(2,(height/2)-2);
         int columns = Random.Range(2,(width/2)-2);
 
-        picrossRows = new int[rows]; 
-        picrossColumns = new int[columns]; 
+        picrossRows = new int[rows];
+        picrossColumns = new int[columns];
 
-        //This randomly picks the rows and columns that will be the picross part of the game. 
+        //This randomly picks the rows and columns that will be the picross part of the game.
         //The number of rows and columns does not exceed the numbers generated above.
-        for (int i = 0; i < rows; i++){
-            picrossRows[i] = Random.Range(0,height);
+        var picrossRowsSet = new HashSet<int>();
+        var picrossColumnsSet = new HashSet<int>();
+        while (picrossRowsSet.Count < rows) {
+            picrossRowsSet.Add(Random.Range(0, height));
         }
-
-
-        for (int i = 0; i < columns; i++){
-            picrossColumns[i] = Random.Range(0,width);
+        while (picrossColumnsSet.Count < columns) {
+            picrossColumnsSet.Add(Random.Range(0, width));
         }
+        picrossRowsSet.CopyTo(picrossRows);
+        picrossColumnsSet.CopyTo(picrossColumns);
 
 
         foreach (int row in picrossRows){
@@ -173,7 +175,7 @@ public class MainGame : MonoBehaviour
                     if (state[x,y].number != 9){
                         state[x,y].number = CountMines(x,y);
                     }
-                    
+
                 }
             }
         }
@@ -203,5 +205,5 @@ public class MainGame : MonoBehaviour
 
     }
 
-    
+
 }
