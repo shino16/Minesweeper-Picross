@@ -6,7 +6,10 @@ using UnityEngine.Tilemaps;
 // Inherits from MonoBehaviour since it uses a Tilemap
 public class Board : MonoBehaviour
 {
-    public Tilemap tilemap 
+    int xOffset = 8;
+    int yOffset = 15;
+
+    public Tilemap tilemap
     {
         get;
         private set;
@@ -24,6 +27,7 @@ public class Board : MonoBehaviour
     public Tile cellEmpty;
     public Tile cellUnknown;
     public Tile cellHidden;
+    public Tile cellFlagged;
     public Tile cellMine;
     public Tile square1;
     public Tile square2;
@@ -43,46 +47,53 @@ public class Board : MonoBehaviour
     public Tile square16;
 
 
-    private void Awake() 
+    private void Awake()
     {
         tilemap = GetComponent<Tilemap>();
     }
 
 
-    /* All draw methods are given (i,j) coordinates relative to 
+    // Converts coordinates on the board to a cell position on tilemap.
+    public Vector3Int CoordToCell(int i, int j) {
+        return new Vector3Int(i + xOffset, yOffset - j, 0);
+    }
+
+
+    // Converts a cell position on tilemap to coordinates on the board.
+    public (int, int) CellToCoord(Vector3Int vec) {
+        return (vec.x - xOffset, -vec.y + yOffset);
+    }
+
+
+    // Converts a screen position wrt the main camera (e.g. Input.mousePosition)
+    // to coordinates on the board.
+    public (int, int) ScreenToCoord(Vector3 vec) {
+        Vector3 worldPoint = Camera.main.ScreenToWorldPoint(vec);
+        Vector3Int cell = tilemap.WorldToCell(worldPoint);
+        return CellToCoord(cell);
+    }
+
+
+    /* All draw methods are given (i,j) coordinates relative to
     only the Minesweeper grid (clickable cells) i.e. the top-left cell
-    is at (0,0) and a potential Picross square to the 
+    is at (0,0) and a potential Picross square to the
     left of it is at (-1,0) */
 
     public void drawSquare(Square square, int i, int j)
     {
-        Vector3Int pos = new Vector3Int(i+8,15-j,0);
+        Vector3Int pos = CoordToCell(i, j);
         tilemap.SetTile(pos, squareTile(square));
     }
 
 
-    public void drawCell(Cell cell, int i, int j) 
+    public void drawCell(Cell cell, int i, int j)
     {
-        Vector3Int pos = new Vector3Int(i+8,15-j,0);
+        Vector3Int pos = CoordToCell(i, j);
         tilemap.SetTile(pos, cellTile(cell));
     }
 
 
-    /* No need to give coordinates for this method - this
-    only draws the clickable cells, not the Picross squares */
-    public void drawGrid(Cell[,] grid) 
-    {
-        for (int i = 0; i < 16; i++)
-        {
-            for (int j = 0; j < 16; j++)
-            {
-                drawCell(grid[i,j], i, j);
-            }
-        }
-    }
-
-
-    private Tile squareTile(Square square) 
+    private Tile squareTile(Square square)
     {
         switch (square.number)
         {
@@ -106,15 +117,18 @@ public class Board : MonoBehaviour
         }
     }
 
-    
+
     private Tile cellTile(Cell cell)
     {
-        if (!cell.revealed)
+        if (cell.flagged)
+        {
+            return cellFlagged;
+        }
+        else if (!cell.revealed)
         {
             return cellHidden;
         }
-
-        else 
+        else
         {
             switch (cell.number)
             {

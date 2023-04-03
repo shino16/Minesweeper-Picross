@@ -374,6 +374,7 @@ MonoBehaviour:
   cellEmpty: {fileID: 11400000, guid: dd61825cc7ee09d4b8b2c963012a5035, type: 2}
   cellUnknown: {fileID: 11400000, guid: 276e5a4b5c6705f4d91a41fb46e70599, type: 2}
   cellHidden: {fileID: 11400000, guid: 6b9f581b8c086194e9b2db58e67bc4b7, type: 2}
+  cellFlagged: {fileID: 11400000, guid: 50793f47f6594ed4897f9dc2866c31f0, type: 2}
   cellMine: {fileID: 11400000, guid: 95cea56f2d1964c48b6d62241a4cdaa2, type: 2}
   square1: {fileID: 11400000, guid: 6375b5ba025714f47b0e840d24eeb690, type: 2}
   square2: {fileID: 11400000, guid: 91f45545446e13f448b02314fd0996fc, type: 2}
