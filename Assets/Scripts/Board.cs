@@ -53,16 +53,20 @@ public class Board : MonoBehaviour
     }
 
 
+    // Converts coordinates on the board to a cell position on tilemap.
     public Vector3Int CoordToCell(int i, int j) {
         return new Vector3Int(i + xOffset, yOffset - j, 0);
     }
 
 
+    // Converts a cell position on tilemap to coordinates on the board.
     public (int, int) CellToCoord(Vector3Int vec) {
         return (vec.x - xOffset, -vec.y + yOffset);
     }
 
 
+    // Converts a screen position wrt the main camera (e.g. Input.mousePosition)
+    // to coordinates on the board.
     public (int, int) ScreenToCoord(Vector3 vec) {
         Vector3 worldPoint = Camera.main.ScreenToWorldPoint(vec);
         Vector3Int cell = tilemap.WorldToCell(worldPoint);
