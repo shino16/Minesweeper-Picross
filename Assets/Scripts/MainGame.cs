@@ -10,8 +10,8 @@ public class MainGame : MonoBehaviour
     public int height = 16;
     public int mineNum = 50;
 
-    public GameObject youWonTitle, youWonMessage, youWonBackground;
-    public GameObject gameOverTitle, gameOverMessage, gameOverBackground;
+    public GameObject youWonObjects, youWonMessage;
+    public GameObject gameOverObjects, gameOverMessage;
 
     private const float LongPressDuration = 0.5f;
 
@@ -300,9 +300,7 @@ public class MainGame : MonoBehaviour
         TMP_Text message = youWonMessage.GetComponent<TMP_Text>();
         message.text = string.Format(message.text, stopwatch.Elapsed.Seconds);
 
-        youWonTitle.SetActive(true);
-        youWonMessage.SetActive(true);
-        youWonBackground.SetActive(true);
+        youWonObjects.SetActive(true);
     }
 
     private void GameOver()
@@ -310,8 +308,6 @@ public class MainGame : MonoBehaviour
         TMP_Text message = gameOverMessage.GetComponent<TMP_Text>();
         message.text = string.Format(message.text, score);
 
-        gameOverTitle.SetActive(true);
-        gameOverMessage.SetActive(true);
-        gameOverBackground.SetActive(true);
+        gameOverObjects.SetActive(true);
     }
 }
