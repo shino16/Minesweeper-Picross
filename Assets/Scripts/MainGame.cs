@@ -290,6 +290,27 @@ public class MainGame : MonoBehaviour
             score += 1;
             if (score == width * height - mineNum)
                 GameWon();
+            if (state[i, j].number == 0)
+            {
+                RevealCellAround(i, j);
+            }
+        }
+    }
+
+    private void RevealCellAround(int centerI, int centerJ) {
+        for (int i = centerI - 1; i <= centerI + 1; i++)
+        {
+            for (int j = centerJ - 1; j <= centerJ + 1; j++)
+            {
+                if (i < 0 || i >= height || j < 0 || j >= width)
+                {
+                    continue;
+                }
+                if (!state[i, j].revealed)
+                {
+                    RevealCell(i, j);
+                }
+            }
         }
     }
 
