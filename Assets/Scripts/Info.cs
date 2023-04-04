@@ -6,7 +6,6 @@ public class Info : MonoBehaviour
     public Button infoButton;
     public GameObject howToPlayText, howToPlayBackground;
 
-
     void Start()
     {
         infoButton.onClick.AddListener(() =>
