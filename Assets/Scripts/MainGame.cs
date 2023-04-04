@@ -1,7 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Stopwatch = System.Diagnostics.Stopwatch;
 
 public class MainGame : MonoBehaviour
 {
@@ -10,6 +10,7 @@ public class MainGame : MonoBehaviour
     public int height = 16;
     public int mineNum = 50;
 
+    public GameObject youWonTitle, youWonMessage, youWonBackground;
     public GameObject gameOverTitle, gameOverMessage, gameOverBackground;
 
     private const float LongPressDuration = 0.5f;
@@ -20,6 +21,7 @@ public class MainGame : MonoBehaviour
     private int[] picrossRows;
     private int[] picrossColumns;
     private int score;
+    private Stopwatch stopwatch;
 
     private void Awake()
     {
@@ -48,6 +50,9 @@ public class MainGame : MonoBehaviour
                 board.drawCell(state[i, j], i, j);
             }
         }
+
+        stopwatch = new Stopwatch();
+        stopwatch.Start();
     }
 
     //INITIAL SET UP =====================================================================================
@@ -277,14 +282,32 @@ public class MainGame : MonoBehaviour
         state[i, j].revealed = true;
         board.drawCell(state[i, j], i, j);
         if (state[i, j].number == -1)
+        {
             GameOver();
+        }
         else
+        {
             score += 1;
+            if (score == width * height - mineNum)
+                GameWon();
+        }
+    }
+
+    private void GameWon()
+    {
+        stopwatch.Stop();
+
+        TMP_Text message = youWonMessage.GetComponent<TMP_Text>();
+        message.text = string.Format(message.text, stopwatch.Elapsed.Seconds);
+
+        youWonTitle.SetActive(true);
+        youWonMessage.SetActive(true);
+        youWonBackground.SetActive(true);
     }
 
     private void GameOver()
     {
-        TMP_Text message = gameOverMessage.GetComponentInChildren<TMP_Text>();
+        TMP_Text message = gameOverMessage.GetComponent<TMP_Text>();
         message.text = string.Format(message.text, score);
 
         gameOverTitle.SetActive(true);
