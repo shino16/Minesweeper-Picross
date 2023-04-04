@@ -1,6 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using Stopwatch = System.Diagnostics.Stopwatch;
 
 public class MainGame : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class MainGame : MonoBehaviour
     public int height = 16;
     public int mineNum = 50;
 
+    public GameObject youWonTitle, youWonMessage, youWonBackground;
+    public GameObject gameOverTitle, gameOverMessage, gameOverBackground;
+
     private const float LongPressDuration = 0.5f;
 
     private Board board;
@@ -16,6 +20,8 @@ public class MainGame : MonoBehaviour
     private Cell[,] mines;
     private int[] picrossRows;
     private int[] picrossColumns;
+    private int score;
+    private Stopwatch stopwatch;
 
     private void Awake()
     {
@@ -44,6 +50,9 @@ public class MainGame : MonoBehaviour
                 board.drawCell(state[i, j], i, j);
             }
         }
+
+        stopwatch = new Stopwatch();
+        stopwatch.Start();
     }
 
     //INITIAL SET UP =====================================================================================
@@ -204,12 +213,14 @@ public class MainGame : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
             return Input.mousePosition;
+
         foreach (Touch touch in Input.touches)
         {
             if (touch.phase == TouchPhase.Ended
                     && touch.deltaTime >= LongPressDuration)
                 return touch.position;
         }
+
         return null;
     }
 
@@ -219,12 +230,14 @@ public class MainGame : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
             return Input.mousePosition;
+
         foreach (Touch touch in Input.touches)
         {
             if (touch.phase == TouchPhase.Ended
                     && touch.deltaTime < LongPressDuration)
                 return touch.position;
         }
+
         return null;
     }
 
@@ -237,14 +250,9 @@ public class MainGame : MonoBehaviour
             {
                 Debug.Log($"Flag ({i}, {j})");
                 if (state[i, j].revealed)
-                {
                     Debug.Log("Ignoring Flag on a revealed cell");
-                }
                 else
-                {
-                    state[i, j].flagged = !state[i, j].flagged;
-                    board.drawCell(state[i, j], i, j);
-                }
+                    ToggleFlagCell(i, j);
             }
         }
 
@@ -255,16 +263,55 @@ public class MainGame : MonoBehaviour
             {
                 Debug.Log($"Reveal ({i}, {j})");
                 if (state[i, j].flagged)
-                {
                     Debug.Log("Ignoring Reveal on a flagged cell");
-                }
                 else
-                {
-                    state[i, j].flagged = false;
-                    state[i, j].revealed = true;
-                    board.drawCell(state[i, j], i, j);
-                }
+                    RevealCell(i, j);
             }
         }
+    }
+
+    private void ToggleFlagCell(int i, int j)
+    {
+        state[i, j].flagged = !state[i, j].flagged;
+        board.drawCell(state[i, j], i, j);
+    }
+
+    private void RevealCell(int i, int j)
+    {
+        state[i, j].flagged = false;
+        state[i, j].revealed = true;
+        board.drawCell(state[i, j], i, j);
+        if (state[i, j].number == -1)
+        {
+            GameOver();
+        }
+        else
+        {
+            score += 1;
+            if (score == width * height - mineNum)
+                GameWon();
+        }
+    }
+
+    private void GameWon()
+    {
+        stopwatch.Stop();
+
+        TMP_Text message = youWonMessage.GetComponent<TMP_Text>();
+        message.text = string.Format(message.text, stopwatch.Elapsed.Seconds);
+
+        youWonTitle.SetActive(true);
+        youWonMessage.SetActive(true);
+        youWonBackground.SetActive(true);
+    }
+
+    private void GameOver()
+    {
+        TMP_Text message = gameOverMessage.GetComponent<TMP_Text>();
+        message.text = string.Format(message.text, score);
+
+        gameOverTitle.SetActive(true);
+        gameOverMessage.SetActive(true);
+        gameOverBackground.SetActive(true);
     }
 }
