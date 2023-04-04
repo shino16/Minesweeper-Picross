@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Info : MonoBehaviour
+public class HowToPlay : MonoBehaviour
 {
-    public Button infoButton;
+    public Button howToPlayButton;
     public GameObject howToPlayObjects;
 
     private void Start()
     {
-        infoButton.onClick.AddListener(() =>
+        howToPlayButton.onClick.AddListener(() =>
             howToPlayObjects.SetActive(!howToPlayObjects.activeSelf));
     }
 }
