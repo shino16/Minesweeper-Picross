@@ -6,8 +6,8 @@ using UnityEngine.Tilemaps;
 // Inherits from MonoBehaviour since it uses a Tilemap
 public class Board : MonoBehaviour
 {
-    int xOffset = 8;
-    int yOffset = 15;
+    public int offsetI;
+    public int offsetJ;
 
     public Tilemap tilemap
     {
@@ -46,52 +46,47 @@ public class Board : MonoBehaviour
     public Tile square15;
     public Tile square16;
 
-
     private void Awake()
     {
         tilemap = GetComponent<Tilemap>();
     }
 
-
     // Converts coordinates on the board to a cell position on tilemap.
-    public Vector3Int CoordToCell(int i, int j) {
-        return new Vector3Int(i + xOffset, yOffset - j, 0);
+    public Vector3Int CoordToCell(int i, int j)
+    {
+        return new Vector3Int(j + offsetJ, -i + offsetI, 0);
     }
-
 
     // Converts a cell position on tilemap to coordinates on the board.
-    public (int, int) CellToCoord(Vector3Int vec) {
-        return (vec.x - xOffset, -vec.y + yOffset);
+    public (int, int) CellToCoord(Vector3Int vec)
+    {
+        return (-vec.y + offsetI, vec.x - offsetJ);
     }
-
 
     // Converts a screen position wrt the main camera (e.g. Input.mousePosition)
     // to coordinates on the board.
-    public (int, int) ScreenToCoord(Vector3 vec) {
+    public (int, int) ScreenToCoord(Vector3 vec)
+    {
         Vector3 worldPoint = Camera.main.ScreenToWorldPoint(vec);
         Vector3Int cell = tilemap.WorldToCell(worldPoint);
         return CellToCoord(cell);
     }
 
-
-    /* All draw methods are given (i,j) coordinates relative to
-    only the Minesweeper grid (clickable cells) i.e. the top-left cell
-    is at (0,0) and a potential Picross square to the
-    left of it is at (-1,0) */
-
+    // All draw methods are given (i,j) coordinates relative to
+    // only the Minesweeper grid (clickable cells) i.e. the top-left cell
+    // is at (0,0) and a potential Picross square to the
+    // left of it is at (-1,0)
     public void drawSquare(Square square, int i, int j)
     {
         Vector3Int pos = CoordToCell(i, j);
         tilemap.SetTile(pos, squareTile(square));
     }
 
-
     public void drawCell(Cell cell, int i, int j)
     {
         Vector3Int pos = CoordToCell(i, j);
         tilemap.SetTile(pos, cellTile(cell));
     }
-
 
     private Tile squareTile(Square square)
     {
@@ -116,7 +111,6 @@ public class Board : MonoBehaviour
             default: return null;
         }
     }
-
 
     private Tile cellTile(Cell cell)
     {

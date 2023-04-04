@@ -786,6 +786,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7a38d91b3abd174d8df2fcec6e79348, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  offsetI: 15
+  offsetJ: 5
   cell1: {fileID: 11400000, guid: 8a5f04c131f18644f8c3b4bbde576405, type: 2}
   cell2: {fileID: 11400000, guid: b5c7e2773becfb5489a529984c96efaa, type: 2}
   cell3: {fileID: 11400000, guid: e8f132b7d086e75499c2b760b942781d, type: 2}

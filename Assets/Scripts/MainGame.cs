@@ -17,72 +17,63 @@ public class MainGame : MonoBehaviour
     private int[] picrossRows;
     private int[] picrossColumns;
 
-
-
     private void Awake()
     {
         board = GetComponentInChildren<Board>();
     }
-
 
     private void Start()
     {
         NewGame();
     }
 
-
     //generates new game (need to modify to start new game on user input later)
     private void NewGame()
     {
         //new game has initial game state
-        state = new Cell[width, height];
+        state = new Cell[height, width];
         MakeCells();
         MakeMines();
         NumberCells();
         MakeSquares();
 
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < height; i++)
         {
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < width; j++)
             {
                 board.drawCell(state[i, j], i, j);
             }
         }
     }
 
-
-
-
     //INITIAL SET UP =====================================================================================
 
-    private void MakeMines(){
+    private void MakeMines()
+    {
         //Iterates through the number of mines required (set to 50 by default)
-        for (int i = 0; i < mineNum; i++){
-            int x = 0;
-            int y = 0;
-            bool isMine = true;
-            while (isMine){
-                //Mines can be anywhere ranging from (0,0) to (width-1, height-1)
-                x = Random.Range(0, width);
-                y = Random.Range(0,height);
+        for (int iter = 0; iter < mineNum; iter++)
+        {
+            int i;
+            int j;
+            do
+            {
+                //Mines can be anywhere ranging from (0,0) to (height-1, width-1)
+                i = Random.Range(0, height);
+                j = Random.Range(0, width);
                 //This is to avoid generating a mine in the same position more than once. This ensures we have exactly 50 mines
-                if (!(state[x,y].number == -1)){
-                    isMine = false;
-                }
-            }
+            } while (state[i, j].number == -1);
 
             //sets cell to -1, allows board to draw the correct cell type (nuke-y)
-            state[x,y].number = -1;
+            state[i, j].number = -1;
         }
     }
 
-
-
-    private void MakeSquares(){
+    private void MakeSquares()
+    {
         //generates a random number between 2 and just below half of the respective dimension
         //This determines the number of the picross rows and columns
-        int rows = Random.Range(2,(height/2)-2);
-        int columns = Random.Range(2,(width/2)-2);
+        int rows = Random.Range(2, (height / 2) - 2);
+        int columns = Random.Range(2, (width / 2) - 2);
 
         picrossRows = new int[rows];
         picrossColumns = new int[columns];
@@ -91,144 +82,151 @@ public class MainGame : MonoBehaviour
         //The number of rows and columns does not exceed the numbers generated above.
         var picrossRowsSet = new HashSet<int>();
         var picrossColumnsSet = new HashSet<int>();
-        while (picrossRowsSet.Count < rows) {
+        while (picrossRowsSet.Count < rows)
+        {
             picrossRowsSet.Add(Random.Range(0, height));
         }
-        while (picrossColumnsSet.Count < columns) {
+        while (picrossColumnsSet.Count < columns)
+        {
             picrossColumnsSet.Add(Random.Range(0, width));
         }
         picrossRowsSet.CopyTo(picrossRows);
         picrossColumnsSet.CopyTo(picrossColumns);
 
-
-        foreach (int row in picrossRows){
+        foreach (int i in picrossRows)
+        {
             int pos = -1; //initialise position of picross squares. Must be to the left of the minesweeper grid
             int picrossSquare = 0; //initialise length of first maximal consecutive non-nukey cells to 0
-            int x = height-1; // to fill in picross squares from right to left we count the cells from right to left
 
-            while (x >= 0){
-                if (!(state[x,row].number == -1)){//if a cell is not a mine, set it to ? and increase our count of consecutive non-mines by 1
-                    state[x,row].number = 9;
-                    picrossSquare ++;
-                }else{//otherwise reset count to 0 and move to the next picross square position, so if (-1,row) is filled in, (-2,row) will be next ...
-                    if (picrossSquare != 0){
-                        board.drawSquare(new Square(picrossSquare),pos,row);
-                        pos --;
+            // to fill in picross squares from right to left we count the cells from right to left
+            for (int j = width - 1; j >= 0; j--)
+            {
+                if (state[i, j].number != -1)
+                {//if a cell is not a mine, set it to ? and increase our count of consecutive non-mines by 1
+                    state[i, j].number = 9;
+                    picrossSquare++;
+                }
+                else
+                {//otherwise reset count to 0 and move to the next picross square position, so if (i,-1) is filled in, (i,-2) will be next ...
+                    if (picrossSquare != 0)
+                    {
+                        board.drawSquare(new Square(picrossSquare), i, pos);
+                        pos--;
                         picrossSquare = 0;
                     }
                 }
-                x--;
             }
-            board.drawSquare(new Square(picrossSquare),pos,row);
+            board.drawSquare(new Square(picrossSquare), i, pos);
         }
 
-
-        foreach (int column in picrossColumns){
+        foreach (int j in picrossColumns)
+        {
             int pos = -1; //initialise position of picross squares. Must be to the above the minesweeper grid
             int picrossSquare = 0; //initialise length of first maximal consecutive non-nukey cells to 0
-            int y = width-1; // fill in picross squares from bottom to top
 
-            while (y >= 0){
-                if (!(state[column,y].number == -1)){//if a cell is not a mine, set it to ? and increase our count of consecutive non-mines by 1
-                    state[column,y].number = 9;
-                    picrossSquare ++;
-                }else{//otherwise reset count to 0 and move to next picross square position
-                    if (picrossSquare != 0){
-                        board.drawSquare(new Square(picrossSquare),column,pos);
-                        pos --;
+            // fill in picross squares from bottom to top
+            for (int i = height - 1; i >= 0; i--)
+            {
+                if (state[i, j].number != -1)
+                {//if a cell is not a mine, set it to ? and increase our count of consecutive non-mines by 1
+                    state[i, j].number = 9;
+                    picrossSquare++;
+                }
+                else
+                {//otherwise reset count to 0 and move to next picross square position
+                    if (picrossSquare != 0)
+                    {
+                        board.drawSquare(new Square(picrossSquare), pos, j);
+                        pos--;
                         picrossSquare = 0;
                     }
                 }
-                y--;
             }
-            board.drawSquare(new Square(picrossSquare),column,pos);
+            board.drawSquare(new Square(picrossSquare), pos, j);
         }
-
     }
 
-
-
-    private void MakeCells(){
+    private void MakeCells()
+    {
         //for each box in our grid, make a new empty cell
-        for (int x = 0; x < width; x++){
-            for (int y = 0; y < height; y++){
+        for (int i = 0; i < height; i++)
+        {
+            for (int j = 0; j < width; j++)
+            {
                 Cell cell = new Cell();
                 cell.number = 0;
                 cell.revealed = false;
                 cell.flagged = false;
-                state[x,y] = cell;
+                state[i, j] = cell;
             }
         }
     }
 
-
-
-    private int CountMines(int x, int y){
+    private int CountMines(int centerI, int centerJ)
+    {
         int count = 0;
-        for (int i = x-1; i < x+2; i++){//for each cell (x,y), check all 8 cells surrounding it (cell(x-1,y-1) to cell(x+1,y+1))
-            for (int j = y-1; j < y+2; j++){
-                if (i<0 || i>=width || j<0 || j>=height){//avoids checking cells that are out of bounds
+        for (int i = centerI - 1; i < centerI + 2; i++)
+        {//for each cell (i,j), check all 8 cells surrounding it (cell(i-1,j-1) to cell(i+1,j+1))
+            for (int j = centerJ - 1; j < centerJ + 2; j++)
+            {
+                if (i < 0 || i >= height || j < 0 || j >= width)
+                {//avoids checking cells that are out of bounds
                     continue;
                 }
-                if (state[i,j].number == -1){ //increase count if a surrounding cell is a mine
-                    count ++;
+                if (state[i, j].number == -1)
+                { //increase count if a surrounding cell is a mine
+                    count++;
                 }
             }
         }
         return count;
     }
 
-
-
-    private void NumberCells(){
-        for (int x = 0; x < width; x++){//for each cell in the grid, count the mines surrounding it and number it accordingly
-            for (int y = 0; y < height; y++){
-                if (state[x,y].number != -1){
-                    if (state[x,y].number != 9){
-                        state[x,y].number = CountMines(x,y);
-                    }
-
+    private void NumberCells()
+    {
+        for (int i = 0; i < height; i++)
+        {//for each cell in the grid, count the mines surrounding it and number it accordingly
+            for (int j = 0; j < width; j++)
+            {
+                if (state[i, j].number != -1 && state[i, j].number != 9)
+                {
+                    state[i, j].number = CountMines(i, j);
                 }
             }
         }
     }
 
-
     //USER INPUT==========================================================================================
 
-    //private void Update(){ //Mobile commands???
-      //  foreach(Touch touch in Input.touches){
-        //    if (touch.phase == TouchPhase.Began){
-          //  }
-    //}
-
-
-    // Returns true if a right click or a long tap is detected
+    // Returns the position vector if a right click or a long tap is detected
+    // Returns null otherwise
     private Vector3? DetectFlagAction()
     {
-        if (Input.GetMouseButtonDown(1)) return Input.mousePosition;
+        if (Input.GetMouseButtonDown(1))
+            return Input.mousePosition;
         foreach (Touch touch in Input.touches)
         {
             if (touch.phase == TouchPhase.Ended
-                && touch.deltaTime >= LongPressDuration) return touch.position;
+                    && touch.deltaTime >= LongPressDuration)
+                return touch.position;
         }
         return null;
     }
-
 
     // Returns the position vector if a left click or a tap is detected
     // Returns null otherwise
     private Vector3? DetectRevealAction()
     {
-        if (Input.GetMouseButtonDown(0)) return Input.mousePosition;
+        if (Input.GetMouseButtonDown(0))
+            return Input.mousePosition;
         foreach (Touch touch in Input.touches)
         {
             if (touch.phase == TouchPhase.Ended
-                && touch.deltaTime < LongPressDuration) return touch.position;
+                    && touch.deltaTime < LongPressDuration)
+                return touch.position;
         }
         return null;
     }
-
 
     private void Update()
     {
@@ -249,6 +247,7 @@ public class MainGame : MonoBehaviour
                 }
             }
         }
+
         if (DetectRevealAction() is Vector3 revealPos)
         {
             (int i, int j) = board.ScreenToCoord(revealPos);
