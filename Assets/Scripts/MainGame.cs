@@ -110,10 +110,11 @@ public class MainGame : MonoBehaviour
             // to fill in picross squares from right to left we count the cells from right to left
             for (int j = width - 1; j >= 0; j--)
             {
-                if (state[i, j].number != -1 && state[i, j].number != 0)
-                {//if a cell is numbered, set it to ? and increase our count of consecutive non-mines by 1
-                    state[i, j].number = 9;
+                if (state[i, j].number != -1)
+                {//if a cell is not a mine, increase our count of consecutive non-mines by 1
                     picrossSquare++;
+                    if (state[i, j].number != 0)    // if numbered, set it to ?
+                        state[i, j].number = 9;
                 }
                 else
                 {//otherwise reset count to 0 and move to the next picross square position, so if (i,-1) is filled in, (i,-2) will be next ...
@@ -136,10 +137,11 @@ public class MainGame : MonoBehaviour
             // fill in picross squares from bottom to top
             for (int i = height - 1; i >= 0; i--)
             {
-                if (state[i, j].number != -1 && state[i, j].number != 0)
-                {//if a cell is numbered, set it to ? and increase our count of consecutive non-mines by 1
-                    state[i, j].number = 9;
+                if (state[i, j].number != -1)
+                {//if a cell is not a mine, increase our count of consecutive non-mines by 1
                     picrossSquare++;
+                    if (state[i, j].number != 0)    // if numbered, set it to ?
+                        state[i, j].number = 9;
                 }
                 else
                 {//otherwise reset count to 0 and move to next picross square position
@@ -297,7 +299,8 @@ public class MainGame : MonoBehaviour
         }
     }
 
-    private void RevealCellAround(int centerI, int centerJ) {
+    private void RevealCellAround(int centerI, int centerJ)
+    {
         for (int i = centerI - 1; i <= centerI + 1; i++)
         {
             for (int j = centerJ - 1; j <= centerJ + 1; j++)
