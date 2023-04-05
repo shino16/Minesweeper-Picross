@@ -110,8 +110,8 @@ public class MainGame : MonoBehaviour
             // to fill in picross squares from right to left we count the cells from right to left
             for (int j = width - 1; j >= 0; j--)
             {
-                if (state[i, j].number != -1)
-                {//if a cell is not a mine, set it to ? and increase our count of consecutive non-mines by 1
+                if (state[i, j].number != -1 && state[i, j].number != 0)
+                {//if a cell is numbered, set it to ? and increase our count of consecutive non-mines by 1
                     state[i, j].number = 9;
                     picrossSquare++;
                 }
@@ -136,8 +136,8 @@ public class MainGame : MonoBehaviour
             // fill in picross squares from bottom to top
             for (int i = height - 1; i >= 0; i--)
             {
-                if (state[i, j].number != -1)
-                {//if a cell is not a mine, set it to ? and increase our count of consecutive non-mines by 1
+                if (state[i, j].number != -1 && state[i, j].number != 0)
+                {//if a cell is numbered, set it to ? and increase our count of consecutive non-mines by 1
                     state[i, j].number = 9;
                     picrossSquare++;
                 }
