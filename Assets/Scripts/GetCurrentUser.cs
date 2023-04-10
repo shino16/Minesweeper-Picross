@@ -22,7 +22,7 @@ public class GetCurrentUser : MonoBehaviour
     {
         Firebase.Auth.FirebaseUser user = auth.CurrentUser;
 		if (user != null) {
-			nicknameLabel.text = "User: " + user.DisplayName;
+			nicknameLabel.text = "User: " + user.Email;
 		}
 		else{
 			nicknameLabel.text = "User: not signed in";

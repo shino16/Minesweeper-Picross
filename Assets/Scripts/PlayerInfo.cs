@@ -8,7 +8,7 @@ public class PlayerInfo : MonoBehaviour
 {
     public Button logInButton, startButton;
     public TMP_InputField passwordInput, emailInput;
-	public TextMeshProUGUI errorLabel;
+	public TMP_Text errorLabel;
     public GameObject yourInfoObjects, howToPlayObjects, mainGame, verifyEmailObjects;
 
     private void Start()
