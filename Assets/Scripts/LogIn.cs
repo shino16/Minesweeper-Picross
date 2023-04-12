@@ -4,31 +4,25 @@ using TMPro;
 using Firebase.Auth;
 using Firebase.Extensions;
 
-public class PlayerInfo : MonoBehaviour
+public class LogIn : MonoBehaviour
 {
     public Button logInButton, startButton;
     public TMP_InputField passwordInput, emailInput;
 	public TMP_Text errorLabel;
     public GameObject yourInfoObjects, howToPlayObjects, mainGame, verifyEmailObjects;
-
+	private void OnEnable(){
+		emailInput.text = "";
+		passwordInput.text = "";
+		errorLabel.SetText("");
+	}
     private void Start()
     {
-		Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
-			var dependencyStatus = task.Result;
-			if (dependencyStatus == Firebase.DependencyStatus.Available) {
-				// Create and hold a reference to your FirebaseApp,
-				// where app is a Firebase.FirebaseApp property of your application class.
-			
-				// Set a flag here to indicate whether Firebase is ready to use by your app.
-			} else {
-				UnityEngine.Debug.LogError(System.String.Format(
-				"Could not resolve all Firebase dependencies: {0}", dependencyStatus));
-				// Firebase Unity SDK is not safe to use here.
-			}
-		});
         logInButton.onClick.AddListener(() => {
 			Debug.Log("Clicked login");
 			FirebaseAuth.DefaultInstance.SignInWithEmailAndPasswordAsync(emailInput.text, passwordInput.text).ContinueWithOnMainThread(task => {
+				emailInput.text = "";
+				passwordInput.text = "";
+				errorLabel.SetText("");
 				if (task.IsCanceled) {
 					Debug.LogError("SignIn was canceled.");
 					return;
