@@ -13,7 +13,7 @@ public class MainGame : MonoBehaviour
     public GameObject youWonObjects, youWonMessage;
     public GameObject gameOverObjects, gameOverMessage;
 
-    private const float LongPressDuration = 0.5f;
+    private const long LongPressDuration = 500; // in ms
 
     private Board board;
     private Cell[,] state;
@@ -22,10 +22,12 @@ public class MainGame : MonoBehaviour
     private int[] picrossColumns;
     private int score;
     private Stopwatch stopwatch;
+    private Dictionary<int, Stopwatch> touchTime;
 
     private void Awake()
     {
         board = GetComponentInChildren<Board>();
+        touchTime = new Dictionary<int, Stopwatch>();
     }
 
     private void Start()
@@ -51,8 +53,7 @@ public class MainGame : MonoBehaviour
             }
         }
 
-        stopwatch = new Stopwatch();
-        stopwatch.Start();
+        stopwatch = Stopwatch.StartNew();
     }
 
     //INITIAL SET UP =====================================================================================
@@ -211,6 +212,23 @@ public class MainGame : MonoBehaviour
 
     // Returns the position vector if a right click or a long tap is detected
     // Returns null otherwise
+    private void ProcessTouches()
+    {
+        foreach (Touch touch in Input.touches)
+        {
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    touchTime.Add(touch.fingerId, Stopwatch.StartNew());
+                    break;
+                case TouchPhase.Ended:
+                case TouchPhase.Canceled:
+                    touchTime.Remove(touch.fingerId);
+                    break;
+            }
+        }
+    }
+
     private Vector3? DetectFlagAction()
     {
         if (Input.GetMouseButtonDown(1))
@@ -218,11 +236,12 @@ public class MainGame : MonoBehaviour
 
         foreach (Touch touch in Input.touches)
         {
-            if (touch.phase == TouchPhase.Ended
-                    && touch.deltaTime >= LongPressDuration)
+            bool released =
+                touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled;
+            long elapsed = touchTime[touch.fingerId].ElapsedMilliseconds;
+            if (released && elapsed < LongPressDuration)
                 return touch.position;
         }
-
         return null;
     }
 
@@ -235,8 +254,10 @@ public class MainGame : MonoBehaviour
 
         foreach (Touch touch in Input.touches)
         {
-            if (touch.phase == TouchPhase.Ended
-                    && touch.deltaTime < LongPressDuration)
+            bool released =
+                touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled;
+            long elapsed = touchTime[touch.fingerId].ElapsedMilliseconds;
+            if (released && elapsed >= LongPressDuration)
                 return touch.position;
         }
 
@@ -245,6 +266,8 @@ public class MainGame : MonoBehaviour
 
     private void Update()
     {
+        ProcessTouches();
+
         if (DetectFlagAction() is Vector3 flagPos)
         {
             (int i, int j) = board.ScreenToCoord(flagPos);
