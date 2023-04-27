@@ -77,6 +77,22 @@ public class MainGame : MonoBehaviour
         }
     }
 
+    private void PickPicrossEntries(int[] choice, int dimension)
+    {
+        int choiceNum = choice.Length;
+        int gap = (dimension - choiceNum) / (choiceNum - 1);
+        int remaining = (dimension - choiceNum) % (choiceNum - 1);
+
+        choice[0] = 0;
+        int previous = 0;
+        for (int i = 1; i < choiceNum; i++)
+        {
+            int next = previous + gap + 1;
+            if (i <= remaining) next++;
+            previous = choice[i] = next;
+        }
+    }
+
     private void MakeSquares()
     {
         //generates a random number between 2 and just below half of the respective dimension
@@ -87,20 +103,8 @@ public class MainGame : MonoBehaviour
         picrossRows = new int[rows];
         picrossColumns = new int[columns];
 
-        //This randomly picks the rows and columns that will be the picross part of the game.
-        //The number of rows and columns does not exceed the numbers generated above.
-        var picrossRowsSet = new HashSet<int>();
-        var picrossColumnsSet = new HashSet<int>();
-        while (picrossRowsSet.Count < rows)
-        {
-            picrossRowsSet.Add(Random.Range(0, height));
-        }
-        while (picrossColumnsSet.Count < columns)
-        {
-            picrossColumnsSet.Add(Random.Range(0, width));
-        }
-        picrossRowsSet.CopyTo(picrossRows);
-        picrossColumnsSet.CopyTo(picrossColumns);
+        PickPicrossEntries(picrossRows, height);
+        PickPicrossEntries(picrossColumns, width);
 
         foreach (int i in picrossRows)
         {
