@@ -14,7 +14,7 @@ public class MainGame : MonoBehaviour
     public int mineNum = 50;
 
     public GameObject youWonObjects, youWonMessage;
-    public GameObject gameOverObjects, gameOverMessage, gameOverNewHSMessage;
+    public GameObject gameOverObjects, gameOverMessage, gameOverNewHSMessage, currentHSMessage;
 
     private const float LongPressDuration = 0.5f;
 
@@ -44,7 +44,27 @@ public class MainGame : MonoBehaviour
     //generates new game (need to modify to start new game on user input later)
     private void NewGame()
     {
+        //get the current high score and show it in the text field
+        currentHSMessage.SetActive(false);
+        Firebase.Auth.FirebaseUser user = auth.CurrentUser;
+        DocumentReference docRef = db.Collection("users").Document(user.UserId);
+        docRef.GetSnapshotAsync().ContinueWithOnMainThread(task =>
+        {
+            DocumentSnapshot snapshot = task.Result;
+            if (snapshot.Exists) {
+                Debug.LogFormat("Document data for {0} document:", snapshot.Id);
+                Dictionary<string, object> userData = snapshot.ToDictionary();
+                var currentHS = System.Convert.ToInt32(userData["highScore"]);
+                TMP_Text currentHSLabel = currentHSMessage.GetComponent<TMP_Text>();
+                currentHSLabel.text = string.Format(currentHSLabel.text, currentHS);
+            } else {
+            Debug.LogFormat("Document {0} does not exist!", snapshot.Id);
+            }
+        });
+        currentHSMessage.SetActive(true);
         gameOverNewHSMessage.SetActive(false);
+
+        
         //new game has initial game state
         state = new Cell[height, width];
         MakeCells();
@@ -325,7 +345,6 @@ public class MainGame : MonoBehaviour
             }
         }
     }
-
     private void GameWon()
     {
         stopwatch.Stop();
@@ -353,8 +372,11 @@ public class MainGame : MonoBehaviour
                 Debug.LogFormat("Old HS: {0}", oldHighScore);
                 if(oldHighScore<score){
                     gameOverNewHSMessage.SetActive(true);
+                    docRef.UpdateAsync("highScore", score).ContinueWithOnMainThread(task => {
+                        Debug.Log(
+                            "Updated the high score");
+                    });
                 }
-                
             } else {
             Debug.LogFormat("Document {0} does not exist!", snapshot.Id);
             }
