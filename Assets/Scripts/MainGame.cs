@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Firebase.Firestore;
+using Firebase.Auth;
+using Firebase.Extensions;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
 public class MainGame : MonoBehaviour
@@ -11,7 +14,7 @@ public class MainGame : MonoBehaviour
     public int mineNum = 50;
 
     public GameObject youWonObjects, youWonMessage;
-    public GameObject gameOverObjects, gameOverMessage;
+    public GameObject gameOverObjects, gameOverMessage, gameOverNewHSMessage;
 
     private const float LongPressDuration = 0.5f;
 
@@ -23,6 +26,9 @@ public class MainGame : MonoBehaviour
     private int score;
     private Stopwatch stopwatch;
 
+    Firebase.Auth.FirebaseAuth auth;
+    FirebaseFirestore db;
+
     private void Awake()
     {
         board = GetComponentInChildren<Board>();
@@ -30,12 +36,15 @@ public class MainGame : MonoBehaviour
 
     private void Start()
     {
+        db = FirebaseFirestore.DefaultInstance;
+        auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
         NewGame();
     }
 
     //generates new game (need to modify to start new game on user input later)
     private void NewGame()
     {
+        gameOverNewHSMessage.SetActive(false);
         //new game has initial game state
         state = new Cell[height, width];
         MakeCells();
@@ -331,7 +340,25 @@ public class MainGame : MonoBehaviour
     {
         TMP_Text message = gameOverMessage.GetComponent<TMP_Text>();
         message.text = string.Format(message.text, score);
-
         gameOverObjects.SetActive(true);
+        Firebase.Auth.FirebaseUser user = auth.CurrentUser;
+        DocumentReference docRef = db.Collection("users").Document(user.UserId);
+        docRef.GetSnapshotAsync().ContinueWithOnMainThread(task =>
+        {
+            DocumentSnapshot snapshot = task.Result;
+            if (snapshot.Exists) {
+                Debug.LogFormat("Document data for {0} document:", snapshot.Id);
+                Dictionary<string, object> userData = snapshot.ToDictionary();
+                var oldHighScore = System.Convert.ToInt32(userData["highScore"]);
+                Debug.LogFormat("Old HS: {0}", oldHighScore);
+                if(oldHighScore<score){
+                    gameOverNewHSMessage.SetActive(true);
+                }
+                
+            } else {
+            Debug.LogFormat("Document {0} does not exist!", snapshot.Id);
+            }
+        });
+        
     }
 }
