@@ -16,7 +16,7 @@ public class MainGame : MonoBehaviour
     public GameObject youWonObjects, youWonMessage;
     public GameObject gameOverObjects, gameOverMessage, gameOverNewHSMessage, currentHSMessage;
 
-    private const long LongPressDuration = 500; // in ms
+    private const long LongPressDuration = 250; // in ms
 
     private Board board;
     private Cell[,] state;
@@ -66,7 +66,7 @@ public class MainGame : MonoBehaviour
         currentHSMessage.SetActive(true);
         gameOverNewHSMessage.SetActive(false);
 
-        
+
         //new game has initial game state
         state = new Cell[height, width];
         MakeCells();
@@ -411,6 +411,6 @@ public class MainGame : MonoBehaviour
             Debug.LogFormat("Document {0} does not exist!", snapshot.Id);
             }
         });
-        
+
     }
 }
