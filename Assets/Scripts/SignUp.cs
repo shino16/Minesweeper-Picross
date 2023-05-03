@@ -2,7 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Firebase.Auth;
+using Firebase.Firestore;
 using Firebase.Extensions;
+using System.Collections.Generic;
 
 public class SignUp : MonoBehaviour
 {
@@ -19,6 +21,7 @@ public class SignUp : MonoBehaviour
 	}
     private void Start()
     {
+		FirebaseFirestore db = FirebaseFirestore.DefaultInstance;
         signUpButton.onClick.AddListener(() => {
 			Debug.Log("Clicked signup");
 			errorLabel.SetText("");
@@ -42,6 +45,8 @@ public class SignUp : MonoBehaviour
 					// Firebase user has been created.
 					Debug.Log("Signup successful");
 					Firebase.Auth.FirebaseUser newUser = task.Result;
+
+					//Update DisplayName of the user.
 					Firebase.Auth.UserProfile profile = new Firebase.Auth.UserProfile {
 						DisplayName = username,
 					};
@@ -55,7 +60,21 @@ public class SignUp : MonoBehaviour
 							return;
 						}
 						Debug.Log("User profile updated successfully.");
+
+						//Add user's document in the score database.
+						DocumentReference docRef = db.Collection("users").Document(newUser.UserId);
+						Dictionary<string, object> userData = new Dictionary<string, object>
+						{
+        					{ "email", newUser.Email },
+        					{ "highScore", 0 },
+        					{ "username", newUser.DisplayName }
+						};
+						docRef.SetAsync(userData).ContinueWithOnMainThread(task => {
+        					Debug.Log("Added new user's data to the users collection.");
+						});
 					});
+
+					//Send verification email
 					newUser.SendEmailVerificationAsync().ContinueWithOnMainThread(t => {
 						Debug.Log("SendEmailVerificationAsync Success");
 					});
