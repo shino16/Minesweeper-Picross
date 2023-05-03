@@ -12,6 +12,7 @@ public class MainGame : MonoBehaviour
     public int width = 16;
     public int height = 16;
     public int mineNum = 50;
+    public int picrossRevealProb = 3;
 
     public GameObject youWonObjects, youWonMessage;
     public GameObject gameOverObjects, gameOverMessage, gameOverNewHSMessage, currentHSMessage;
@@ -143,7 +144,8 @@ public class MainGame : MonoBehaviour
                 {//if a cell is not a mine, increase our count of consecutive non-mines by 1
                     picrossSquare++;
                     if (state[i, j].number != 0)    // if numbered, set it to ?
-                        state[i, j].number = 9;
+                        if(Random.Range(0,picrossRevealProb)==0)
+                            state[i, j].number = 9;
                 }
                 else
                 {//otherwise reset count to 0 and move to the next picross square position, so if (i,-1) is filled in, (i,-2) will be next ...
@@ -170,7 +172,8 @@ public class MainGame : MonoBehaviour
                 {//if a cell is not a mine, increase our count of consecutive non-mines by 1
                     picrossSquare++;
                     if (state[i, j].number != 0)    // if numbered, set it to ?
-                        state[i, j].number = 9;
+                        if(Random.Range(0,picrossRevealProb)==0) 
+                            state[i, j].number = 9;
                 }
                 else
                 {//otherwise reset count to 0 and move to next picross square position
@@ -295,7 +298,7 @@ public class MainGame : MonoBehaviour
                 Debug.Log($"Reveal ({i}, {j})");
                 if (state[i, j].flagged)
                     Debug.Log("Ignoring Reveal on a flagged cell");
-                else
+                else if (!state[i,j].revealed)
                     RevealCell(i, j);
             }
         }
@@ -350,7 +353,7 @@ public class MainGame : MonoBehaviour
         stopwatch.Stop();
 
         TMP_Text message = youWonMessage.GetComponent<TMP_Text>();
-        message.text = string.Format(message.text, stopwatch.Elapsed.Seconds);
+        message.text = string.Format(message.text, (stopwatch.Elapsed.Minutes*60+stopwatch.Elapsed.Seconds));
 
         youWonObjects.SetActive(true);
     }
