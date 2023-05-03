@@ -262,9 +262,6 @@ public class MainGame : MonoBehaviour
 
     private Vector3? DetectFlagAction()
     {
-        if (Input.GetMouseButtonDown(1))
-            return Input.mousePosition;
-
         foreach (Touch touch in Input.touches)
         {
             bool released =
@@ -274,6 +271,10 @@ public class MainGame : MonoBehaviour
             if (released && elapsed >= LongPressDuration)
                 return touch.position;
         }
+
+        if (Input.GetMouseButtonUp(1))
+            return Input.mousePosition;
+
         return null;
     }
 
@@ -281,9 +282,6 @@ public class MainGame : MonoBehaviour
     // Returns null otherwise
     private Vector3? DetectRevealAction()
     {
-        if (Input.GetMouseButtonDown(0))
-            return Input.mousePosition;
-
         foreach (Touch touch in Input.touches)
         {
             bool released =
@@ -294,6 +292,9 @@ public class MainGame : MonoBehaviour
             if (released && elapsed < LongPressDuration)
                 return touch.position;
         }
+
+        if (Input.GetMouseButtonUp(0))
+            return Input.mousePosition;
 
         return null;
     }
