@@ -12,17 +12,25 @@ public class GetCurrentUser : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-		
+
 		Debug.Log("Setting up Firebase Auth");
-		auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+		Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
+			var dependencyStatus = task.Result;
+			if (dependencyStatus == Firebase.DependencyStatus.Available) {
+				auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+			} else {
+				UnityEngine.Debug.LogError(System.String.Format(
+				"Could not resolve all Firebase dependencies: {0}", dependencyStatus));
+				// Firebase Unity SDK is not safe to use here.
+			}
+		});
     }
 
     // Update is called once per frame
     void Update()
     {
-        Firebase.Auth.FirebaseUser user = auth.CurrentUser;
-		if (user != null) {
-			nicknameLabel.text = "User: " + user.DisplayName;
+		if (auth != null && auth.CurrentUser != null) {
+			nicknameLabel.text = "User: " + auth.CurrentUser.DisplayName;
 		}
 		else{
 			nicknameLabel.text = "User: not signed in";
