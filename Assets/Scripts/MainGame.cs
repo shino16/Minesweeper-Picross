@@ -16,7 +16,7 @@ public class MainGame : MonoBehaviour
     public GameObject youWonObjects, youWonMessage;
     public GameObject gameOverObjects, gameOverMessage, gameOverNewHSMessage, currentHSMessage;
 
-    private const float LongPressDuration = 0.5f;
+    private const long LongPressDuration = 250; // in ms
 
     private Board board;
     private Cell[,] state;
@@ -25,6 +25,7 @@ public class MainGame : MonoBehaviour
     private int[] picrossColumns;
     private int score;
     private Stopwatch stopwatch;
+    private Dictionary<int, Stopwatch> touchTime;
 
     Firebase.Auth.FirebaseAuth auth;
     FirebaseFirestore db;
@@ -32,6 +33,7 @@ public class MainGame : MonoBehaviour
     private void Awake()
     {
         board = GetComponentInChildren<Board>();
+        touchTime = new Dictionary<int, Stopwatch>();
     }
 
     private void Start()
@@ -64,7 +66,7 @@ public class MainGame : MonoBehaviour
         currentHSMessage.SetActive(true);
         gameOverNewHSMessage.SetActive(false);
 
-        
+
         //new game has initial game state
         state = new Cell[height, width];
         MakeCells();
@@ -80,8 +82,7 @@ public class MainGame : MonoBehaviour
             }
         }
 
-        stopwatch = new Stopwatch();
-        stopwatch.Start();
+        stopwatch = Stopwatch.StartNew();
     }
 
     //INITIAL SET UP =====================================================================================
@@ -240,17 +241,39 @@ public class MainGame : MonoBehaviour
 
     // Returns the position vector if a right click or a long tap is detected
     // Returns null otherwise
-    private Vector3? DetectFlagAction()
+    private void ProcessTouchBegan()
     {
-        if (Input.GetMouseButtonDown(1))
-            return Input.mousePosition;
+        foreach (Touch touch in Input.touches)
+        {
+            if (touch.phase == TouchPhase.Began)
+                touchTime.Add(touch.fingerId, Stopwatch.StartNew());
+        }
+    }
 
+    private void ProcessTouchReleased()
+    {
         foreach (Touch touch in Input.touches)
         {
             if (touch.phase == TouchPhase.Ended
-                    && touch.deltaTime >= LongPressDuration)
+                || touch.phase == TouchPhase.Canceled)
+                touchTime.Remove(touch.fingerId);
+        }
+    }
+
+    private Vector3? DetectFlagAction()
+    {
+        foreach (Touch touch in Input.touches)
+        {
+            bool released =
+                touch.phase == TouchPhase.Ended
+                || touch.phase == TouchPhase.Canceled;
+            long elapsed = touchTime[touch.fingerId].ElapsedMilliseconds;
+            if (released && elapsed >= LongPressDuration)
                 return touch.position;
         }
+
+        if (Input.GetMouseButtonUp(1))
+            return Input.mousePosition;
 
         return null;
     }
@@ -259,21 +282,27 @@ public class MainGame : MonoBehaviour
     // Returns null otherwise
     private Vector3? DetectRevealAction()
     {
-        if (Input.GetMouseButtonDown(0))
-            return Input.mousePosition;
-
         foreach (Touch touch in Input.touches)
         {
-            if (touch.phase == TouchPhase.Ended
-                    && touch.deltaTime < LongPressDuration)
+            bool released =
+                touch.phase == TouchPhase.Ended
+                || touch.phase == TouchPhase.Canceled;
+            Debug.Log($"{touch.fingerId}: {touch.phase}");
+            long elapsed = touchTime[touch.fingerId].ElapsedMilliseconds;
+            if (released && elapsed < LongPressDuration)
                 return touch.position;
         }
+
+        if (Input.GetMouseButtonUp(0))
+            return Input.mousePosition;
 
         return null;
     }
 
     private void Update()
     {
+        ProcessTouchBegan();
+
         if (DetectFlagAction() is Vector3 flagPos)
         {
             (int i, int j) = board.ScreenToCoord(flagPos);
@@ -299,6 +328,8 @@ public class MainGame : MonoBehaviour
                     RevealCell(i, j);
             }
         }
+
+        ProcessTouchReleased();
     }
 
     private void ToggleFlagCell(int i, int j)
@@ -381,6 +412,6 @@ public class MainGame : MonoBehaviour
             Debug.LogFormat("Document {0} does not exist!", snapshot.Id);
             }
         });
-        
+
     }
 }
