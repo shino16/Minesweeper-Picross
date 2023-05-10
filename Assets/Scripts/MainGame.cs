@@ -13,6 +13,7 @@ public class MainGame : MonoBehaviour
     public int height = 16;
     public int mineNum = 50;
     public int picrossRevealProb = 3;
+    public bool active;
 
     public GameObject youWonObjects, youWonMessage;
     public GameObject gameOverObjects, gameOverMessage, gameOverNewHSMessage, currentHSMessage;
@@ -37,7 +38,7 @@ public class MainGame : MonoBehaviour
         touchTime = new Dictionary<int, Stopwatch>();
     }
 
-    private void Start()
+    public void Start()
     {
         db = FirebaseFirestore.DefaultInstance;
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
@@ -83,6 +84,7 @@ public class MainGame : MonoBehaviour
             }
         }
 
+        active = true;
         stopwatch = Stopwatch.StartNew();
     }
 
@@ -173,7 +175,7 @@ public class MainGame : MonoBehaviour
                 {//if a cell is not a mine, increase our count of consecutive non-mines by 1
                     picrossSquare++;
                     if (state[i, j].number != 0)    // if numbered, set it to ?
-                        if(Random.Range(0,picrossRevealProb)==0) 
+                        if(Random.Range(0,picrossRevealProb)==0)
                             state[i, j].number = 9;
                 }
                 else
@@ -304,6 +306,7 @@ public class MainGame : MonoBehaviour
 
     private void Update()
     {
+        if (!active) return;
         ProcessTouchBegan();
 
         if (DetectFlagAction() is Vector3 flagPos)
@@ -382,6 +385,7 @@ public class MainGame : MonoBehaviour
     private void GameWon()
     {
         stopwatch.Stop();
+        active = false;
 
         TMP_Text message = youWonMessage.GetComponent<TMP_Text>();
         message.text = string.Format(message.text, (stopwatch.Elapsed.Minutes*60+stopwatch.Elapsed.Seconds));
@@ -391,6 +395,7 @@ public class MainGame : MonoBehaviour
 
     private void GameOver()
     {
+        active = false;
         TMP_Text message = gameOverMessage.GetComponent<TMP_Text>();
         message.text = string.Format(message.text, score);
         gameOverObjects.SetActive(true);

@@ -79,6 +79,7 @@ public class Board : MonoBehaviour
     public void drawSquare(Square square, int i, int j)
     {
         Vector3Int pos = CoordToCell(i, j);
+        Debug.Log($"Draw {pos}");
         tilemap.SetTile(pos, squareTile(square));
     }
 
