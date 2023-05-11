@@ -459,6 +459,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainMenuObjects: {fileID: 541952113}
   currentObjects: {fileID: 667739312}
+  gameOverPanel: {fileID: 0}
+  mainGame: {fileID: 0}
 --- !u!1 &58970254
 GameObject:
   m_ObjectHideFlags: 0
@@ -2634,6 +2636,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainMenuObjects: {fileID: 541952113}
   currentObjects: {fileID: 1279197645}
+  gameOverPanel: {fileID: 1668932837}
+  mainGame: {fileID: 1279197646}
 --- !u!114 &585379248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5329,6 +5333,7 @@ MonoBehaviour:
   height: 16
   mineNum: 50
   picrossRevealProb: 3
+  active: 0
   youWonObjects: {fileID: 349914243}
   youWonMessage: {fileID: 186811510}
   gameOverObjects: {fileID: 1668932837}
